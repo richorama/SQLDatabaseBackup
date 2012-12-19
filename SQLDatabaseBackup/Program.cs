@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
@@ -13,13 +15,18 @@ namespace Two10.SQLDatabaseBackup
 
         static void Main(string[] args)
         {
-            string server = "xxx";                  // i.e. the first part of xxx.database.windows.net
-            string database = "DatabaseName";       // name of the database you want to back up
-            string backupDatabase = "DatabaseCopy"; // name for the backup database (it will create)
-            string username = "username";           // database username
-            string password = "xxx";                // database password
-            string blobAccount = "accountname";     // storage account
-            string blobKey = @"yyy";                // storage key
+
+            string server = GetSwitch(args, "-server");         // i.e. the first part of xxx.database.windows.net
+            string database = GetSwitch(args, "-database");     // name of the database you want to back up
+            string backupDatabase = database + "-copy";         // name for the backup database (it will create)
+            if (GetSwitch(args, "-databasecopy") != null)
+            {
+                backupDatabase = GetSwitch(args, "-databasecopy");
+            }
+            string username = GetSwitch(args, "-user");           // database username
+            string password = GetSwitch(args, "-pwd");            // database password
+            string blobAccount = GetSwitch(args, "-storagename"); // storage account
+            string blobKey = GetSwitch(args, "-storagekey");     // storage key
 
 
             using (var copier = new DatabaseCopier(CreateConnection(server, database, username, password)))
@@ -90,6 +97,25 @@ namespace Two10.SQLDatabaseBackup
         {
             return new SqlConnection(string.Format(@"Server=tcp:{0}.database.windows.net,1433;Database=master;User ID={2}@{0};Password={3};Trusted_Connection=False;Encrypt=True;", server, database, username, password));
         }
+
+        public static string GetSwitch(string[] args, string name)
+        {
+            if (null == args) throw new ArgumentNullException("args");
+            if (null == name) throw new ArgumentNullException("name");
+
+            var argsList = new List<string>(args.Select(x => x.ToLower()));
+            var index = argsList.IndexOf(name.ToLower());
+            if (index == -1)
+            {
+                return null;
+            }
+            if (args.Length < index + 2)
+            {
+                return null;
+            }
+            return args[index + 1];
+        }
+
 
     }
 }
