@@ -48,7 +48,10 @@ SQLDatabaseBackup.exe
                 return;
             }
 
-            CheckSwitches("-server", "-database", "-user", "-pwd", "-storagename", "-storagekey", "-datacenter");
+            if (!CheckSwitches("-server", "-database", "-user", "-pwd", "-storagename", "-storagekey", "-datacenter"))
+            {
+                return;
+            }
 
             string server = GetSwitch("-server");         // i.e. the first part of xxx.database.windows.net
             string database = GetSwitch("-database");     // name of the database you want to back up
@@ -63,6 +66,10 @@ SQLDatabaseBackup.exe
             string blobKey = GetSwitch("-storagekey");     // storage key
 
             string dataCenterUri = ResolveUri(GetSwitch("-datacenter"));
+            if (string.IsNullOrWhiteSpace(dataCenterUri))
+            {
+                return;
+            }
 
             using (var copier = new DatabaseCopier(CreateConnection(server, database, username, password)))
             {
@@ -82,21 +89,14 @@ SQLDatabaseBackup.exe
         static Guid Export(string serverName, string databaseName, string userName, string password, string blob, string key, string managementUri)
         {
             // Call the REST API, with an XML document containing the job details and credentials.
-
             // NB This API does not seem to be documented on MSDN and therefore could be subject to change.
 
-
-
-
             var request = WebRequest.Create(managementUri);
-
             request.Method = "POST";
 
-            Stream dataStream = request.GetRequestStream();
-
+            var dataStream = request.GetRequestStream();
             string body = String.Format("<ExportInput xmlns=\"http://schemas.datacontract.org/2004/07/Microsoft.SqlServer.Management.Dac.ServiceTypes\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><BlobCredentials i:type=\"BlobStorageAccessKeyCredentials\"><Uri>{0}</Uri><StorageAccessKey>{1}</StorageAccessKey></BlobCredentials><ConnectionInfo><DatabaseName>{2}</DatabaseName><Password>{3}</Password><ServerName>{4}</ServerName><UserName>{5}</UserName></ConnectionInfo></ExportInput>", blob, key, databaseName, password, serverName, userName);
-
-            System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding();
+            var utf8 = new System.Text.UTF8Encoding();
             byte[] buffer = utf8.GetBytes(body);
             dataStream.Write(buffer, 0, buffer.Length);
 
@@ -150,7 +150,8 @@ SQLDatabaseBackup.exe
             {
                 if (GetSwitch(arg) == null)
                 {
-                    Console.WriteLine("Please supply a value the \"" + arg + "\" argument");
+                    Console.WriteLine("Please supply the \"" + arg + "\" argument");
+                    returnVal = false;
                 }
             }
             return returnVal;
@@ -174,9 +175,11 @@ SQLDatabaseBackup.exe
                     return "https://sn1prod-dacsvc.azure.com/DACWebService.svc";
                 case "westus":
                 case "eastus":
-                    throw new ArgumentException("Datacenter uri not known");
+                    Console.WriteLine("Datacenter uri not known");
+                    return null;
                 default:
-                    throw new ArgumentException("Unknown datacenter");
+                    Console.WriteLine("Unknown datacenter");
+                    return null;
             }
         }
 
