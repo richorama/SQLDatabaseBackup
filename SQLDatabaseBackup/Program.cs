@@ -24,8 +24,8 @@ This utility will take a copy of your SQL Database, and once the copy has comple
 
 Please supply for following command line arguments:
 
-    -server [The name of your SQL Database server (without .database.windows.net)]
-    -database [The name of your database]
+    -server [SQL Database server (without .database.windows.net)]
+    -database [database to back up]
     -databasecopy (optional) [The to use as for the temporary copy]
     -user [SQL Database username]
     -pwd [SQL Database password]
