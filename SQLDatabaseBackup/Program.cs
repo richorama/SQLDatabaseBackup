@@ -27,14 +27,15 @@ namespace Two10.SQLDatabaseBackup
             string password = GetSwitch(args, "-pwd");            // database password
             string blobAccount = GetSwitch(args, "-storagename"); // storage account
             string blobKey = GetSwitch(args, "-storagekey");     // storage key
-
+            
+            string dataCenterUri = ResolveUri(GetSwitch(args, "-datacenter"));
 
             using (var copier = new DatabaseCopier(CreateConnection(server, database, username, password)))
             {
                 copier.Copy(database, backupDatabase);
             }
 
-            Guid guid = Export(server + ".database.windows.net", backupDatabase, username, password, string.Format("https://{0}.blob.core.windows.net/sqlbackup/backup.bacpac", blobAccount), blobKey);
+            Guid guid = Export(server + ".database.windows.net", backupDatabase, username, password, string.Format("https://{0}.blob.core.windows.net/sqlbackup/backup.bacpac", blobAccount), blobKey, dataCenterUri);
 
             Console.WriteLine(guid);
 
@@ -44,24 +45,16 @@ namespace Two10.SQLDatabaseBackup
         /// Requests that SQL Azure exports a database to blob storage in BACPAC format.
         /// </summary>
         /// <returns>A GUID representing the job.</returns>
-        static Guid Export(string serverName, string databaseName, string userName, string password, string blob, string key)
+        static Guid Export(string serverName, string databaseName, string userName, string password, string blob, string key, string managementUri)
         {
             // Call the REST API, with an XML document containing the job details and credentials.
 
             // NB This API does not seem to be documented on MSDN and therefore could be subject to change.
 
 
-            /*
-            You must choose the right endpoint for your database location:
-            North Central US	https://ch1prod-dacsvc.azure.com/DACWebService.svc
-            South Central US	https://sn1prod-dacsvc.azure.com/DACWebService.svc
-            North Europe	https://db3prod-dacsvc.azure.com/DACWebService.svc
-            West Europe	https://am1prod-dacsvc.azure.com/DACWebService.svc
-            East Asia	https://hkgprod-dacsvc.azure.com/DACWebService.svc
-            Southeast Asia	https://sg1prod-dacsvc.azure.com/DACWebService.svc
-            */
 
-            var request = WebRequest.Create("https://db3prod-dacsvc.azure.com/DACWebService.svc/Export");
+
+            var request = WebRequest.Create(managementUri);
 
             request.Method = "POST";
 
@@ -114,6 +107,30 @@ namespace Two10.SQLDatabaseBackup
                 return null;
             }
             return args[index + 1];
+        }
+
+        public static string ResolveUri(string dcName)
+        {
+            switch (dcName)
+            {
+                case "westeurope":
+                    return "https://am1prod-dacsvc.azure.com/DACWebService.svc";
+                case "southeastasia":
+                    return "https://sg1prod-dacsvc.azure.com/DACWebService.svc";
+                case "eastasia":
+                    return "https://hkgprod-dacsvc.azure.com/DACWebService.svc";
+                case "northcentralus":
+                    return "https://ch1prod-dacsvc.azure.com/DACWebService.svc";
+                case "northeurope":
+                    return "https://db3prod-dacsvc.azure.com/DACWebService.svc";
+                case "southcentralus":
+                    return "https://sn1prod-dacsvc.azure.com/DACWebService.svc";
+                case "westus":
+                case "eastus":
+                    throw new ArgumentException("Datacenter uri not known");
+                default:
+                    throw new ArgumentException("Unknown datacenter");
+            }
         }
 
 
