@@ -15,20 +15,54 @@ namespace Two10.SQLDatabaseBackup
 
         static void Main(string[] args)
         {
-
-            string server = GetSwitch(args, "-server");         // i.e. the first part of xxx.database.windows.net
-            string database = GetSwitch(args, "-database");     // name of the database you want to back up
-            string backupDatabase = database + "-copy";         // name for the backup database (it will create)
-            if (GetSwitch(args, "-databasecopy") != null)
+            if (args.Length == 0)
             {
-                backupDatabase = GetSwitch(args, "-databasecopy");
+                Console.WriteLine(@"
+Windows Azure SQL Database Copy Utility
+
+This utility will take a copy of your SQL Database, and once the copy has completed, will make a backup of the database to blob storage using the bacpac format.
+
+Please supply for following command line arguments:
+
+    -server [The name of your SQL Database server (without .database.windows.net)]
+    -database [The name of your database]
+    -databasecopy (optional) [The to use as for the temporary copy]
+    -user [SQL Database username]
+    -pwd [SQL Database password]
+    -storagename [Blob Storage account name]
+    -storagekey [Blob Storage account key]
+    -datacenter [The data centre that both the database and storage account are located]
+        (westeurope | southeastasia | eastasia | northcentralus | northeurope | southcentralus)
+
+Example usage:
+
+SQLDatabaseBackup.exe 
+    -server nevixxs 
+    -database mydb 
+    -user username 
+    -pwd password 
+    -storagename storageaccount 
+    -storagekey dmASdd1mg/qPeOgGmCkO333L26cNcnUA1uMcSSOFM... 
+    -datacenter eastasia
+");
+                return;
             }
-            string username = GetSwitch(args, "-user");           // database username
-            string password = GetSwitch(args, "-pwd");            // database password
-            string blobAccount = GetSwitch(args, "-storagename"); // storage account
-            string blobKey = GetSwitch(args, "-storagekey");     // storage key
-            
-            string dataCenterUri = ResolveUri(GetSwitch(args, "-datacenter"));
+
+            CheckSwitches("-server", "-database", "-user", "-pwd", "-storagename", "-storagekey", "-datacenter");
+
+            string server = GetSwitch("-server");         // i.e. the first part of xxx.database.windows.net
+            string database = GetSwitch("-database");     // name of the database you want to back up
+            string backupDatabase = database + "-copy";         // name for the backup database (it will create)
+            if (GetSwitch("-databasecopy") != null)
+            {
+                backupDatabase = GetSwitch("-databasecopy");
+            }
+            string username = GetSwitch("-user");           // database username
+            string password = GetSwitch("-pwd");            // database password
+            string blobAccount = GetSwitch("-storagename"); // storage account
+            string blobKey = GetSwitch("-storagekey");     // storage key
+
+            string dataCenterUri = ResolveUri(GetSwitch("-datacenter"));
 
             using (var copier = new DatabaseCopier(CreateConnection(server, database, username, password)))
             {
@@ -91,10 +125,10 @@ namespace Two10.SQLDatabaseBackup
             return new SqlConnection(string.Format(@"Server=tcp:{0}.database.windows.net,1433;Database=master;User ID={2}@{0};Password={3};Trusted_Connection=False;Encrypt=True;", server, database, username, password));
         }
 
-        public static string GetSwitch(string[] args, string name)
+        public static string GetSwitch(string name)
         {
-            if (null == args) throw new ArgumentNullException("args");
             if (null == name) throw new ArgumentNullException("name");
+            var args = Environment.GetCommandLineArgs();
 
             var argsList = new List<string>(args.Select(x => x.ToLower()));
             var index = argsList.IndexOf(name.ToLower());
@@ -107,6 +141,19 @@ namespace Two10.SQLDatabaseBackup
                 return null;
             }
             return args[index + 1];
+        }
+
+        public static bool CheckSwitches(params string[] argNames)
+        {
+            var returnVal = true;
+            foreach (var arg in argNames)
+            {
+                if (GetSwitch(arg) == null)
+                {
+                    Console.WriteLine("Please supply a value the \"" + arg + "\" argument");
+                }
+            }
+            return returnVal;
         }
 
         public static string ResolveUri(string dcName)
@@ -136,3 +183,5 @@ namespace Two10.SQLDatabaseBackup
 
     }
 }
+
+
