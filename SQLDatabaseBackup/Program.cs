@@ -21,7 +21,7 @@ Please supply for following command line arguments:
 
     -server [SQL Database server (without .database.windows.net)]
     -database [database to back up]
-    -databasecopy (optional) [The to use as for the temporary copy]
+    -databasecopy (optional) [The to use for the temporary copy]
     -user [SQL Database username]
     -pwd [SQL Database password]
     -storagename [Blob Storage account name]
