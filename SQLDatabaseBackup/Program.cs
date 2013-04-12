@@ -55,7 +55,7 @@ SQLDatabaseBackup.exe
 
             string server = GetSwitch("-server");         // i.e. the first part of xxx.database.windows.net
             string database = GetSwitch("-database");     // name of the database you want to back up
-            string backupDatabase = database + "-copy";         // name for the backup database (it will create)
+            string backupDatabase = database + "_copy";         // name for the backup database (it will create)
             if (GetSwitch("-databasecopy") != null)
             {
                 backupDatabase = GetSwitch("-databasecopy");
