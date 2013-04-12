@@ -23,11 +23,13 @@ namespace Two10.SQLDatabaseBackup
             {
                 Thread.Sleep(5000);
             }
+            Console.WriteLine("Database copy complete");
         }
 
 
         private void CopyDatabase(string database, string newDatabase)
         {
+            Console.WriteLine("Creating database copy");
             var command = connection.CreateCommand();
             command.CommandText = string.Format(@"CREATE DATABASE {0} AS COPY OF {1};", newDatabase, database);
             command.ExecuteNonQuery();
@@ -36,6 +38,7 @@ namespace Two10.SQLDatabaseBackup
 
         private bool CheckDatabaseCopied(string database)
         {
+            Console.WriteLine("Checking database copy status");
             var command = connection.CreateCommand();
             command.CommandText = string.Format(@"select count(*) from sys.databases where state = 0 and name = '{0}'", database);
             return 1 == (int)command.ExecuteScalar();
@@ -48,8 +51,10 @@ namespace Two10.SQLDatabaseBackup
             command.CommandText = string.Format(@"select count(*) from sys.databases where name = '{0}'", database);
             if ((int)command.ExecuteScalar() == 1)
             {
+                Console.WriteLine("Dropping database copy");
                 var dropCommand = connection.CreateCommand();
-                dropCommand.CommandText = string.Format("DROP DATABASE '{0}'", database);
+                dropCommand.CommandText = string.Format("DROP DATABASE {0}", database);
+                dropCommand.ExecuteNonQuery();
             }
         }
 
