@@ -53,19 +53,19 @@ SQLDatabaseBackup.exe
                 return;
             }
 
-            string server = GetSwitch("-server");         // i.e. the first part of xxx.database.windows.net
-            string database = GetSwitch("-database");     // name of the database you want to back up
-            string backupDatabase = database + "_copy";         // name for the backup database (it will create)
+            var server = GetSwitch("-server");         // i.e. the first part of xxx.database.windows.net
+            var database = GetSwitch("-database");     // name of the database you want to back up
+            var backupDatabase = database + "_copy";         // name for the backup database (it will create)
             if (GetSwitch("-databasecopy") != null)
             {
                 backupDatabase = GetSwitch("-databasecopy");
             }
-            string username = GetSwitch("-user");           // database username
-            string password = GetSwitch("-pwd");            // database password
-            string blobAccount = GetSwitch("-storagename"); // storage account
-            string blobKey = GetSwitch("-storagekey");     // storage key
+            var username = GetSwitch("-user");           // database username
+            var password = GetSwitch("-pwd");            // database password
+            var blobAccount = GetSwitch("-storagename"); // storage account
+            var blobKey = GetSwitch("-storagekey");     // storage key
 
-            string dataCenterUri = ResolveUri(GetSwitch("-datacenter"));
+            var dataCenterUri = ResolveUri(GetSwitch("-datacenter"));
             if (string.IsNullOrWhiteSpace(dataCenterUri))
             {
                 return;
@@ -76,7 +76,7 @@ SQLDatabaseBackup.exe
                 copier.Copy(database, backupDatabase);
             }
 
-            Guid guid = Export(server + ".database.windows.net", backupDatabase, username, password, string.Format("https://{0}.blob.core.windows.net/sqlbackup/backup.bacpac", blobAccount), blobKey, dataCenterUri);
+            var guid = Export(server + ".database.windows.net", backupDatabase, username, password, string.Format("https://{0}.blob.core.windows.net/sqlbackup/backup.bacpac", blobAccount), blobKey, dataCenterUri);
 
             Console.WriteLine(guid);
 
@@ -95,23 +95,23 @@ SQLDatabaseBackup.exe
             request.Method = "POST";
 
             var dataStream = request.GetRequestStream();
-            string body = String.Format("<ExportInput xmlns=\"http://schemas.datacontract.org/2004/07/Microsoft.SqlServer.Management.Dac.ServiceTypes\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><BlobCredentials i:type=\"BlobStorageAccessKeyCredentials\"><Uri>{0}</Uri><StorageAccessKey>{1}</StorageAccessKey></BlobCredentials><ConnectionInfo><DatabaseName>{2}</DatabaseName><Password>{3}</Password><ServerName>{4}</ServerName><UserName>{5}</UserName></ConnectionInfo></ExportInput>", blob, key, databaseName, password, serverName, userName);
-            var utf8 = new System.Text.UTF8Encoding();
-            byte[] buffer = utf8.GetBytes(body);
+            var body = String.Format("<ExportInput xmlns=\"http://schemas.datacontract.org/2004/07/Microsoft.SqlServer.Management.Dac.ServiceTypes\" xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"><BlobCredentials i:type=\"BlobStorageAccessKeyCredentials\"><Uri>{0}</Uri><StorageAccessKey>{1}</StorageAccessKey></BlobCredentials><ConnectionInfo><DatabaseName>{2}</DatabaseName><Password>{3}</Password><ServerName>{4}</ServerName><UserName>{5}</UserName></ConnectionInfo></ExportInput>", blob, key, databaseName, password, serverName, userName);
+            var utf8 = new UTF8Encoding();
+            var buffer = utf8.GetBytes(body);
             dataStream.Write(buffer, 0, buffer.Length);
 
             dataStream.Close();
             request.ContentType = "application/xml";
 
             // The HTTP response contains the job number, a Guid serialized as XML
-            using (WebResponse response = request.GetResponse())
+            using (var response = request.GetResponse())
             {
-                Encoding encoding = Encoding.GetEncoding(1252);
+                var encoding = Encoding.GetEncoding(1252);
                 using (var responseStream = new StreamReader(response.GetResponseStream(), encoding))
                 {
-                    using (XmlDictionaryReader reader = XmlDictionaryReader.CreateTextReader(responseStream.BaseStream, new XmlDictionaryReaderQuotas()))
+                    using (var reader = XmlDictionaryReader.CreateTextReader(responseStream.BaseStream, new XmlDictionaryReaderQuotas()))
                     {
-                        DataContractSerializer serializer = new DataContractSerializer(typeof(Guid));
+                        var serializer = new DataContractSerializer(typeof(Guid));
                         return (Guid)serializer.ReadObject(reader, true);
 
                     }
