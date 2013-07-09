@@ -43,6 +43,16 @@ Please ensure that a 'sqlbackup' container exists in your storage account (or sp
 
 The bacpac file will have the date and time of the backup appended to the name, allowing you to keep a history of backups.
 
+
+
+### Blob cleanup
+
+To delete old backups from blob storage, see this related project: https://github.com/nwoolls/AzureStorageCleanup
+
+### Credits
+
+Thanks to @nwoolls for his contributions.
+
 ### License
 
 MIT
