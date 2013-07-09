@@ -26,7 +26,7 @@ Please supply for following command line arguments:
     -pwd [SQL Database password]
     -storagename [Blob Storage account name]
     -storagekey [Blob Storage account key]
-    -datacenter [The data centre that both the database and storage account are located]
+    -datacenter [The data center where the database (not storage account) is located]
         (westeurope | southeastasia | eastasia | northcentralus | northeurope | southcentralus | eastus | westus)
 
 Example usage:
