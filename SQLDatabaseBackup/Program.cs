@@ -26,6 +26,7 @@ Please supply for following command line arguments:
     -pwd [SQL Database password]
     -storagename [Blob Storage account name]
     -storagekey [Blob Storage account key]
+    -container (optional) [Blob storage container to use, defaults to sqlbackup]
     -datacenter [The data centre that both the database and storage account are located]
         (westeurope | southeastasia | eastasia | northcentralus | northeurope | southcentralus | eastus | westus)
 
