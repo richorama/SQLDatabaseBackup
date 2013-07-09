@@ -28,6 +28,7 @@ Please supply for following command line arguments:
     -storagekey [Blob Storage account key]
     -datacenter [The data center where the database (not storage account) is located]
         (westeurope | southeastasia | eastasia | northcentralus | northeurope | southcentralus | eastus | westus)
+    -cleanup (optional, remove temporary copy database after successful backup)
 
 Example usage:
 
@@ -80,6 +81,17 @@ SQLDatabaseBackup.exe
 
             var exporter = new DatabaseExporter(server + ".database.windows.net", backupDatabase, username, password, string.Format("https://{0}.blob.core.windows.net/{1}/{2}.bacpac", blobAccount, container, blobName), blobKey, dataCenterUri);
             exporter.Export();
+
+            if (Environment.GetCommandLineArgs().Contains("-cleanup") &&
+                //be extra careful
+                !backupDatabase.Equals(database, StringComparison.CurrentCultureIgnoreCase))
+            {
+                using (var copier = new DatabaseCopier(CreateConnection(server, username, password)))
+                {
+                    copier.DropDatabase(backupDatabase);
+                }
+            }
+
             Console.WriteLine("Database backed up to {0}/{1}", container, blobName);
         }
 
