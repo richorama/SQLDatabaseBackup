@@ -41,6 +41,7 @@ SQLDatabaseBackup.exe
     -storagename storageaccount 
     -storagekey dmASdd1mg/qPeOgGmCkO333L26cNcnUA1uMcSSOFM... 
     -datacenter eastasia
+    -cleanup
 ");
                 return;
             }
