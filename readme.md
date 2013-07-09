@@ -15,9 +15,8 @@ Please supply for following command line arguments:
     -storagekey [Blob Storage account key]
     -container (optional) [Blob storage container to use, defaults to sqlbackup]
     -datacenter [The data center where the database (not storage account) is located]
-	-cleanup 
-
         (westeurope | southeastasia | eastasia | northcentralus | northeurope | southcentralus | eastus | westus)
+	-cleanup 
 ```
 
 Example usage:
