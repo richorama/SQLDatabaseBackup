@@ -45,7 +45,7 @@ namespace Two10.SQLDatabaseBackup
         }
 
 
-        private void DropDatabase(string database)
+        public void DropDatabase(string database)
         {
             var command = connection.CreateCommand();
             command.CommandText = string.Format(@"select count(*) from sys.databases where name = '{0}'", database);
