@@ -37,7 +37,7 @@ The backup process is not transactionally consistent, so the utility creates a c
 
 The database copy will be deleted when the utilty starts, if it already exists.
 
-Please ensure that a 'databasecopy' container exists in your storage account, otherwise the backup API will throw an error.
+Please ensure that a 'sqlbackup' container exists in your storage account (or specify a different value using -container), otherwise the backup API will throw an error.
 
 The bacpac file will have the date and time of the backup appended to the name, allowing you to keep a history of backups.
 
