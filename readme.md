@@ -1,5 +1,5 @@
-Windows Azure SQL Database Copy Utility
-=======================================
+Windows Azure SQL Database Backup Utility
+=========================================
 
 This utility will take a copy of your SQL Database, and once the copy has completed, will make a backup of the database to blob storage using the bacpac format.
 
