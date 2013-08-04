@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace Two10.SQLDatabaseBackup
 {
@@ -10,6 +13,9 @@ namespace Two10.SQLDatabaseBackup
 
         static void Main(string[] args)
         {
+            Application.ThreadException += new ThreadExceptionEventHandler(Application_ThreadException);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+                
             if (args.Length == 0)
             {
                 Console.WriteLine(@"
@@ -78,7 +84,7 @@ SQLDatabaseBackup.exe
             {
                 copier.Copy(database, backupDatabase);
             }
-
+                        
             var blobName = database + "-backup-" + DateTime.UtcNow.ToString("yyyy-MM-dd_hh-mm");
 
             var exporter = new DatabaseExporter(server + ".database.windows.net", backupDatabase, username, password, string.Format("https://{0}.blob.core.windows.net/{1}/{2}.bacpac", blobAccount, container, blobName), blobKey, dataCenterUri);
@@ -97,6 +103,32 @@ SQLDatabaseBackup.exe
             Console.WriteLine("Database backed up to {0}/{1}", container, blobName);
         }
 
+        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            HandleException(e.Exception.ToString());
+        }
+
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            HandleException((e.ExceptionObject as Exception).ToString());
+        }
+
+        private static void HandleException(string exceptionMessage)
+        {
+#if DEBUG
+            Debug.WriteLine("Main exception: " + exceptionMessage);
+            Console.WriteLine("Main exception: " + exceptionMessage);
+#endif
+            LogMessageToWindows(EventLogEntryType.Error, exceptionMessage);
+        }
+
+        private static void LogMessageToWindows(EventLogEntryType eventType, string eventText)
+        {
+            if (!EventLog.SourceExists(Application.ProductName))
+                EventLog.CreateEventSource(Application.ProductName, "Application");
+
+            EventLog.WriteEntry(Application.ProductName, eventText, eventType);
+        }
 
         private static SqlConnection CreateConnection(string server, string username, string password)
         {
