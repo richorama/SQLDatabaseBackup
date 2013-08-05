@@ -33,7 +33,7 @@ Please supply for following command line arguments:
     -storagename [Blob Storage account name]
     -storagekey [Blob Storage account key]
     -container (optional) [Blob storage container to use, defaults to sqlbackup]
-    -datacenter [The data centre that both the database and storage account are located]
+    -datacenter [The data center where the database (not storage account) is located]
         (westeurope | southeastasia | eastasia | northcentralus | northeurope | southcentralus | eastus | westus)
     -cleanup (optional) [Remove temporary copy database after successful backup]
 
