@@ -1,6 +1,10 @@
 Windows Azure SQL Database Backup Utility
 =========================================
 
+Since this tool was written, daily automated backups are now available in the Azure Portal. See [Scott Gu's Blog](http://weblogs.asp.net/scottgu/archive/2013/07/23/windows-azure-july-updates-sql-database-traffic-manager-autoscale-virtual-machines.aspx) for more detail.
+----
+
+
 This utility will take a copy of your SQL Database, and once the copy has completed, will make a backup of the database to blob storage using the bacpac format.
 
 Please supply for following command line arguments:
