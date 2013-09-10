@@ -35,6 +35,8 @@ SQLDatabaseBackup.exe
 
 ### How it works
 
+To create a transactionally consistent backup the utility creates a copy of your database, and then uses the Azure Backup API to copy that database to a bacpac file in Blob Storage.
+
 The backup process is not transactionally consistent, so the utility creates a copy of your database, and then uses the Azure backup API to copy that database to a bacpac file in Blob Storage.
 
 The database copy will be deleted when the utilty starts, if it already exists.
